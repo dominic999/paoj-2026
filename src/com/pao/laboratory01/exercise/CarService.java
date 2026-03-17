@@ -81,6 +81,20 @@ public class CarService {
      */
     public void addReview(String carName, String review) {
         // TODO: implementează aici
+        
+      int  i =0;
+      for (Car car : cars){
+        if (car.getName() == carName){
+          break;  
+        }
+        i++;
+      }
+
+      String[] newReviews = new String[cars[i].getReviews().length + 1];
+      System.arraycopy(cars[i].getReviews(), 0, newReviews, 0, cars[i].getReviews().length);
+      newReviews[newReviews.length - 1] = review;
+      cars[i].setReviews(newReviews);
+        
     }
 }
 
