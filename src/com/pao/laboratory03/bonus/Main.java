@@ -1,5 +1,16 @@
 package com.pao.laboratory03.bonus;
 
+import com.pao.laboratory03.bonus.exception.DuplicateTaskException;
+import com.pao.laboratory03.bonus.exception.InvalidTransitionException;
+import com.pao.laboratory03.bonus.exception.TaskNotFoundException;
+import com.pao.laboratory03.bonus.model.Priority;
+import com.pao.laboratory03.bonus.model.Status;
+import com.pao.laboratory03.bonus.model.Task;
+import com.pao.laboratory03.bonus.service.TaskService;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * Exercițiul 5 (Bonus) — Sistem de gestiune task-uri cu audit log
  *
@@ -155,10 +166,87 @@ package com.pao.laboratory03.bonus;
  */
 public class Main {
     public static void main(String[] args) {
-        // TODO: implementează toți cei 10 pași de mai sus
-        // Creează TOATE clasele necesare în acest pachet (bonus/)
-        // Nu ai subpachete impuse — organizează cum consideri
+        TaskService service = TaskService.getInstance();
+
+        System.out.println("=== Adăugare task-uri ===");
+        Task task1 = service.addTask("Fix login bug", Priority.CRITICAL);
+        Task task2 = service.addTask("Add dark mode", Priority.LOW);
+        Task task3 = service.addTask("Update docs", Priority.MEDIUM);
+        Task task4 = service.addTask("Fix memory leak", Priority.HIGH);
+        Task task5 = service.addTask("Refactor DB layer", Priority.HIGH);
+
+        System.out.println("Adăugat: " + task1);
+        System.out.println("Adăugat: " + task2);
+        System.out.println("Adăugat: " + task3);
+        System.out.println("Adăugat: " + task4);
+        System.out.println("Adăugat: " + task5);
+
+        System.out.println();
+        System.out.println("=== Asignare ===");
+        service.assignTask(task1.getId(), "Ana");
+        System.out.println(task1.getId() + " -> Ana");
+        service.assignTask(task3.getId(), "Mihai");
+        System.out.println(task3.getId() + " -> Mihai");
+        service.assignTask(task4.getId(), "Elena");
+        System.out.println(task4.getId() + " -> Elena");
+
+        System.out.println();
+        System.out.println("=== Schimbări status ===");
+        service.changeStatus(task1.getId(), Status.IN_PROGRESS);
+        System.out.println(task1.getId() + ": TODO -> IN_PROGRESS ✓");
+        service.changeStatus(task1.getId(), Status.DONE);
+        System.out.println(task1.getId() + ": IN_PROGRESS -> DONE ✓");
+        service.changeStatus(task3.getId(), Status.IN_PROGRESS);
+        System.out.println(task3.getId() + ": TODO -> IN_PROGRESS ✓");
+
+        try {
+            service.changeStatus(task1.getId(), Status.TODO);
+        } catch (InvalidTransitionException e) {
+            System.out.println(task1.getId() + ": DONE -> TODO -> InvalidTransitionException: " + e.getMessage());
+        }
+
+        System.out.println();
+        System.out.println("=== Task-uri HIGH ===");
+        List<Task> highPriorityTasks = service.getTasksByPriority(Priority.HIGH);
+        for (Task task : highPriorityTasks) {
+            System.out.println(task);
+        }
+
+        System.out.println();
+        System.out.println("=== Sumar status ===");
+        Map<Status, Long> summary = service.getStatusSummary();
+        for (Status status : Status.values()) {
+            System.out.println(status + ": " + summary.get(status));
+        }
+
+        System.out.println();
+        System.out.println("=== Task-uri neasignate ===");
+        List<Task> unassignedTasks = service.getUnassignedTasks();
+        for (Task task : unassignedTasks) {
+            System.out.println(task.getId() + ": " + task.getTitle());
+        }
+
+        System.out.println();
+        System.out.println("=== Scor urgență (baseDays=5) ===");
+        System.out.println("Total: " + service.getTotalUrgencyScore(5));
+
+        System.out.println();
+        System.out.println("=== Audit Log ===");
+        service.printAuditLog();
+
+        System.out.println();
+        System.out.println("=== Excepții ===");
+        try {
+            service.addTask(new Task(task1.getId(), "Task duplicat", Priority.LOW));
+        } catch (DuplicateTaskException e) {
+            System.out.println("DuplicateTaskException: " + e.getMessage());
+        }
+
+        try {
+            service.findById("T999");
+        } catch (TaskNotFoundException e) {
+            System.out.println("TaskNotFoundException: " + e.getMessage());
+        }
     }
 }
-
 
