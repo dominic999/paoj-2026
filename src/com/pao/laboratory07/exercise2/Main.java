@@ -1,15 +1,19 @@
 package com.pao.laboratory07.exercise2;
 
-import java.util.*;
-import com.pao.laboratory07.exercise1.OrderState;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int n = Integer.parseInt(sc.nextLine().trim());
         List<Comanda> comenzi = new ArrayList<>();
-        int nrStandard = 0, nrDiscounted = 0, nrGift = 0;
-        double sumaStandard = 0, sumaDiscounted = 0;
+        int nrStandard = 0;
+        int nrDiscounted = 0;
+        int nrGift = 0;
+        double sumaStandard = 0;
+        double sumaDiscounted = 0;
         for (int i = 0; i < n; i++) {
             String line = sc.nextLine().trim();
             String[] tokens = line.split(" ");
@@ -40,12 +44,15 @@ public class Main {
         }
         System.out.println();
         System.out.println("Statistici:");
-        if (nrStandard > 0)
-            System.out.printf("STANDARD: suma = %.2f lei, numar = %d\n", sumaStandard, nrStandard);
-        if (nrDiscounted > 0)
-            System.out.printf("DISCOUNTED: suma = %.2f lei, numar = %d\n", sumaDiscounted, nrDiscounted);
-        if (nrGift > 0)
-            System.out.printf("GIFT: suma = 0.00 lei, numar = %d\n", nrGift);
-        System.out.printf("Total platit: %.2f lei\n", sumaStandard + sumaDiscounted);
+        if (nrStandard > 0) {
+            System.out.printf("STANDARD: suma = %.2f lei, numar = %d%n", sumaStandard, nrStandard);
+        }
+        if (nrDiscounted > 0) {
+            System.out.printf("DISCOUNTED: suma = %.2f lei, numar = %d%n", sumaDiscounted, nrDiscounted);
+        }
+        if (nrGift > 0) {
+            System.out.printf("GIFT: suma = 0.00 lei, numar = %d%n", nrGift);
+        }
+        System.out.printf("Total platit: %.2f lei%n", sumaStandard + sumaDiscounted);
     }
 }

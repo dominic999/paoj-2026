@@ -20,7 +20,7 @@ public class Main {
             switch (orderCommand) {
                 case next -> {
                     try {
-                        order.nextState();
+                        System.out.println("Order state updated to: " + order.nextState());
                     } catch (OrderIsAlreadyFinalException e) {
                         System.out.println("Order is already in a final state.");
                     }
@@ -28,13 +28,14 @@ public class Main {
                 case cancel -> {
                     try {
                         order.cancel();
+                        System.out.println("Order has been canceled.");
                     } catch (CannotCancelFinalOrderException e) {
                         System.out.println("Cannot cancel a final state order.");
                     }
                 }
                 case undo -> {
                     try {
-                        order.undoState();
+                        System.out.println("Order state reverted to: " + order.undoState());
                     } catch (CannotRevertInitialOrderStateException e) {
                         System.out.println("Cannot undo the initial order state.");
                     }
