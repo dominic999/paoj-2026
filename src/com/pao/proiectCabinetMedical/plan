@@ -1,0 +1,24 @@
+Persoana:
+  nume, prenume
+
+Medic: 
+  deGarda(boolean), aniExperienta, rezident(boolean), departament
+
+MedicSpecialist: 
+  specializari(string[]) 
+
+Manager:
+  subordonati(Medic[])
+
+asistenta: 
+  aniExperienta, saliResp
+
+pacient:
+  diagnostic, urgenta(boolean), medicSupervizor(Medic)
+
+sali:
+  numar, cladire
+
+
+imbunatatiri:
+  sa iti arate indexii corespunzatori entitatii
