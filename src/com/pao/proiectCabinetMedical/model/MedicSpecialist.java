@@ -1,10 +1,7 @@
-package com.pao.proiectCabinetMedical;
-
-import com.pao.proiectCabinetMedical.utils.Ansi;
+package com.pao.proiectCabinetMedical.model;
 
 public class MedicSpecialist extends Medic {
 
-  Ansi a = Ansi.getInstance();
   private String[] specs;
 
   public MedicSpecialist(String firstName, String lastName, boolean deGarda, int aniExperienta, boolean rezident, String departament, String[] specs){
@@ -21,21 +18,29 @@ public class MedicSpecialist extends Medic {
   }
 
   public void addSpec(String spec){
-    String[] newSpec = new String[specs.length + 1];
-    for (int i = 0; i < specs.length; i++){
-      newSpec[i] = specs[i];
+    if (spec == null || spec.trim().isEmpty()){
+      return;
     }
-    newSpec[specs.length] = spec;
-    specs = newSpec;
+    String[] next = new String[specs.length + 1];
+    for (int i = 0; i < specs.length; i++){
+      next[i] = specs[i];
+    }
+    next[specs.length] = spec.trim();
+    specs = next;
+  }
+
+  @Override
+  public String getRol(){
+    return "Medic specialist";
   }
 
   @Override
   public String toString(){
-    String specText = specs.length == 0 ? "fara specializari" : specs[0];
+    String joined = specs.length == 0 ? "fara specializari" : specs[0];
     for (int i = 1; i < specs.length; i++){
-      specText += ", " + specs[i];
+      joined += ", " + specs[i];
     }
     return super.toString() +
-           a.setForeground(a.red) + " | specializari: " + specText + a.reset();
+           ansi.setForeground(ansi.red) + " | specializari: " + joined + ansi.reset();
   }
 }

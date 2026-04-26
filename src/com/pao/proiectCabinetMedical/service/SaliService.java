@@ -1,15 +1,26 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.Sali;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Sali;
 
 public class SaliService {
 
-  private Sali[] sali;
-  Ansi a = Ansi.getInstance();
+  private final Set<Sali> sali;
 
   private SaliService(){
-    this.sali = new Sali[0];
+    this.sali = new TreeSet<>((left, right) -> {
+      int byCladire = left.getCladire().compareToIgnoreCase(right.getCladire());
+      if (byCladire != 0){
+        return byCladire;
+      }
+      return Integer.compare(left.getNumar(), right.getNumar());
+    });
   }
 
   private static class Holder{
@@ -20,51 +31,28 @@ public class SaliService {
     return Holder.INSTANCE;
   }
 
-  public void addSala(Sali o){
-    Sali[] now = new Sali[sali.length + 1];
-    System.arraycopy(sali, 0, now, 0, sali.length);
-    now[sali.length] = o;
-    sali = now;
+  public void addSala(Sali sala) throws InvalidEntityDataException {
+    if (sala == null){
+      throw new InvalidEntityDataException("Sala nu poate fi null.");
+    }
+    sali.add(sala);
   }
 
-  public Sali[] getSali(){
-    return sali.clone();
+  public void deleteSala(int numar, String cladire) throws EntityNotFoundException {
+    Sali sala = findSala(numar, cladire);
+    sali.remove(sala);
   }
 
-  public void showSali(){
-    System.out.println(a.title("Lista salilor"));
-    System.out.println(a.line());
-    for (int i = 0; i < sali.length; i++){
-      System.out.println(sali[i]);
-    }
-    if (sali.length == 0){
-      System.out.println(a.warning("Nu exista sali inregistrate."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deleteSala(int idx){
-    if (idx < 0 || idx >= sali.length){
-      return;
-    }
-    Sali[] newSali = new Sali[sali.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < sali.length; i++){
-      if (i != idx){
-        newSali[newIdx++] = sali[i];
+  public Sali findSala(int numar, String cladire) throws EntityNotFoundException {
+    for (Sali sala : sali){
+      if (sala.getNumar() == numar && sala.getCladire().equalsIgnoreCase(cladire)){
+        return sala;
       }
     }
-    sali = newSali;
+    throw new EntityNotFoundException("Sala nu a fost gasita: " + numar + " / " + cladire);
   }
 
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu salile?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toate salile."));
-    System.out.println(a.option(2, "Adauga o sala noua."));
-    System.out.println(a.option(3, "Sterge o sala dupa index."));
-    System.out.println(a.option(4, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(5, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public List<Sali> getAllSali(){
+    return new ArrayList<>(sali);
   }
 }

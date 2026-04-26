@@ -1,15 +1,22 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.Pacient;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Pacient;
 
 public class PacientService {
 
-  private Pacient[] pacienti;
-  Ansi a = Ansi.getInstance();
+  private final List<Pacient> pacienti;
+  private final Map<String, List<Pacient>> pacientiByDiagnostic;
 
   private PacientService(){
-    this.pacienti = new Pacient[0];
+    this.pacienti = new ArrayList<>();
+    this.pacientiByDiagnostic = new HashMap<>();
   }
 
   private static class Holder{
@@ -20,52 +27,54 @@ public class PacientService {
     return Holder.INSTANCE;
   }
 
-  public void addPacient(Pacient o){
-    Pacient[] now = new Pacient[pacienti.length + 1];
-    System.arraycopy(pacienti, 0, now, 0, pacienti.length);
-    now[pacienti.length] = o;
-    pacienti = now;
+  public void addPacient(Pacient pacient) throws InvalidEntityDataException {
+    if (pacient == null){
+      throw new InvalidEntityDataException("Pacientul nu poate fi null.");
+    }
+    if (pacient.getFirstName().isEmpty() || pacient.getLastName().isEmpty()){
+      throw new InvalidEntityDataException("Pacientul trebuie sa aiba nume si prenume.");
+    }
+    pacienti.add(pacient);
+    pacientiByDiagnostic.computeIfAbsent(pacient.getDiagnostic(), key -> new ArrayList<>()).add(pacient);
   }
 
-  public Pacient[] getPacienti(){
-    return pacienti.clone();
-  }
-
-  public void showPacienti(){
-    System.out.println(a.title("Lista pacientilor"));
-    System.out.println(a.line());
-    for (int i = 0; i < pacienti.length; i++){
-      System.out.println(pacienti[i]);
-    }
-    if (pacienti.length == 0){
-      System.out.println(a.warning("Nu exista pacienti inregistrati."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deletePacient(int idx){
-    if (idx < 0 || idx >= pacienti.length){
-      return;
-    }
-    Pacient[] newPacienti = new Pacient[pacienti.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < pacienti.length; i++){
-      if (i != idx){
-        newPacienti[newIdx++] = pacienti[i];
+  public void deletePacient(String firstName, String lastName) throws EntityNotFoundException {
+    Pacient pacient = findPacientByName(firstName, lastName);
+    pacienti.remove(pacient);
+    List<Pacient> diagnosticGroup = pacientiByDiagnostic.get(pacient.getDiagnostic());
+    if (diagnosticGroup != null){
+      diagnosticGroup.remove(pacient);
+      if (diagnosticGroup.isEmpty()){
+        pacientiByDiagnostic.remove(pacient.getDiagnostic());
       }
     }
-    pacienti = newPacienti;
   }
 
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu pacientii?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toti pacientii."));
-    System.out.println(a.option(2, "Adauga un pacient nou."));
-    System.out.println(a.option(3, "Sterge un pacient dupa index."));
-    System.out.println(a.option(4, "Vezi diagnosticul si medicul supervizor."));
-    System.out.println(a.option(5, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(6, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public Pacient findPacientByName(String firstName, String lastName) throws EntityNotFoundException {
+    for (Pacient pacient : pacienti){
+      if (pacient.getFirstName().equalsIgnoreCase(firstName) &&
+          pacient.getLastName().equalsIgnoreCase(lastName)){
+        return pacient;
+      }
+    }
+    throw new EntityNotFoundException("Pacientul nu a fost gasit: " + firstName + " " + lastName);
+  }
+
+  public List<Pacient> findPacientiByDiagnostic(String diagnostic){
+    return new ArrayList<>(pacientiByDiagnostic.getOrDefault(diagnostic, new ArrayList<>()));
+  }
+
+  public List<Pacient> getUrgentPacienti(){
+    List<Pacient> urgent = new ArrayList<>();
+    for (Pacient pacient : pacienti){
+      if (pacient.isUrgenta()){
+        urgent.add(pacient);
+      }
+    }
+    return urgent;
+  }
+
+  public List<Pacient> getAllPacienti(){
+    return new ArrayList<>(pacienti);
   }
 }

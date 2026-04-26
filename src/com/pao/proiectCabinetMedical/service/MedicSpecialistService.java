@@ -1,15 +1,18 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.MedicSpecialist;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.MedicSpecialist;
 
 public class MedicSpecialistService {
 
-  private MedicSpecialist[] medics;
-  Ansi a = Ansi.getInstance();
+  private final List<MedicSpecialist> specialisti;
 
   private MedicSpecialistService(){
-    this.medics = new MedicSpecialist[0];
+    this.specialisti = new ArrayList<>();
   }
 
   private static class Holder{
@@ -20,76 +23,35 @@ public class MedicSpecialistService {
     return Holder.INSTANCE;
   }
 
-  public void addMedic(MedicSpecialist o){
-    MedicSpecialist[] now = new MedicSpecialist[medics.length + 1];
-    System.arraycopy(medics, 0, now, 0, medics.length);
-    now[medics.length] = o;
-    medics = now;
+  public void addMedicSpecialist(MedicSpecialist medic) throws InvalidEntityDataException {
+    if (medic == null){
+      throw new InvalidEntityDataException("Medicul specialist nu poate fi null.");
+    }
+    specialisti.add(medic);
   }
 
-  public MedicSpecialist[] getMedics(){
-    return medics.clone();
+  public void deleteMedicSpecialist(int id) throws EntityNotFoundException {
+    MedicSpecialist medic = findMedicSpecialistById(id);
+    specialisti.remove(medic);
   }
 
-  public void showMedics(){
-    System.out.println(a.title("Lista medicilor specialisti"));
-    System.out.println(a.line());
-    for (int i = 0; i < medics.length; i++){
-      System.out.println(medics[i]);
-    }
-    if (medics.length == 0){
-      System.out.println(a.warning("Nu exista medici specialisti inregistrati."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deleteMedic(int idx){
-    if (idx < 0 || idx >= medics.length){
-      return;
-    }
-    MedicSpecialist[] newMedics = new MedicSpecialist[medics.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < medics.length; i++){
-      if (i != idx){
-        newMedics[newIdx++] = medics[i];
+  public MedicSpecialist findMedicSpecialistById(int id) throws EntityNotFoundException {
+    for (MedicSpecialist medic : specialisti){
+      if (medic.getId() == id){
+        return medic;
       }
     }
-    medics = newMedics;
+    throw new EntityNotFoundException("Nu exista medic specialist cu id-ul " + id + ".");
   }
 
-  public void showMedSpecs(int idx){
-    if (idx < 0 || idx >= medics.length){
-      return;
+  public void addSpecToMedic(int id, String spec) throws EntityNotFoundException, InvalidEntityDataException {
+    if (spec == null || spec.trim().isEmpty()){
+      throw new InvalidEntityDataException("Specializarea nu poate fi goala.");
     }
-    String[] specs = medics[idx].getSpecs();
-    System.out.println(a.title("Specializarile medicului"));
-    System.out.println(a.line());
-    for (int i = 0; i < specs.length; i++){
-      System.out.println(a.option(i + 1, specs[i]));
-    }
-    if (specs.length == 0){
-      System.out.println(a.warning("Medicul nu are specializari."));
-    }
-    System.out.println(a.line());
+    findMedicSpecialistById(id).addSpec(spec);
   }
 
-  public void addMedSpec(int idx, String spec){
-    if (idx < 0 || idx >= medics.length){
-      return;
-    }
-    medics[idx].addSpec(spec);
-  }
-
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu medicii specialisti?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toti medicii specialisti."));
-    System.out.println(a.option(2, "Adauga un medic specialist nou."));
-    System.out.println(a.option(3, "Sterge un medic specialist dupa index."));
-    System.out.println(a.option(4, "Vezi specializarile unui medic specialist."));
-    System.out.println(a.option(5, "Adauga o specializare unui medic specialist."));
-    System.out.println(a.option(6, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(7, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public List<MedicSpecialist> getAllMediciSpecialisti(){
+    return new ArrayList<>(specialisti);
   }
 }

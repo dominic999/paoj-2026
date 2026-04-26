@@ -1,14 +1,25 @@
 package com.pao.proiectCabinetMedical.service;
-import com.pao.proiectCabinetMedical.Medic;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Medic;
 
 public class MedicService {
 
-  private Medic[] medics;
-  Ansi a = Ansi.getInstance();
-  
+  private final List<Medic> medici;
+  private final Map<Integer, Medic> mediciById;
+  private final Map<String, List<Medic>> mediciByDepartament;
+
   private MedicService() {
-    this.medics = new Medic[0];
+    this.medici = new ArrayList<>();
+    this.mediciById = new HashMap<>();
+    this.mediciByDepartament = new HashMap<>();
   }
 
   private static class Holder{
@@ -18,83 +29,49 @@ public class MedicService {
   public static MedicService getInstance(){
     return Holder.INSTANCE;
   }
-  
-  
-  public void addMedic(Medic o){
-    Medic[] now = new Medic[medics.length + 1];
-    System.arraycopy(medics, 0, now, 0, medics.length); 
-    now[medics.length] = o;
-    medics = now;
-  }
 
-  public Medic[] getMedics(){
-    return medics.clone();
-  }
-
-  public void showMedics(){
-    System.out.println(a.title("Lista medicilor"));
-    System.out.println(a.line());
-    for (int i = 0; i < medics.length; i++){
-      System.out.println(medics[i]);
-    }
-    if (medics.length == 0){
-      System.out.println(a.warning("Nu exista medici inregistrati."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deleteMedic(int id){
-    if (medics.length == 0){
-      return;
-    }
-    Medic[] newMedics = new Medic[medics.length - 1];
-    int idx = 0;
-    for (int i = 0; i < medics.length; i++){
-      if (medics[i].getId() != id){
-        newMedics[idx++] = medics[i];
-      }
-    }
-    medics = newMedics;
-
-  }
-
-  public Medic findMedicById(int medicId){
-    for (int i = 0; i < medics.length; i++){
-      if (medics[i].getId() == medicId){
-        return medics[i];
-      }
-    }
-    return null;
-  }
-
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu medicii?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toti medicii."));
-    System.out.println(a.option(2, "Adauga un medic nou."));
-    System.out.println(a.option(3, "Sterge un medic dupa id."));
-    System.out.println(a.option(4, "Vezi datele unui medic."));
-    System.out.println(a.option(5, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(6, "Iesire din aplicatie."));
-    System.out.println(a.line());
-  }
-
-  public void showMedicById(int medicId){
-    if (medics.length == 0){
-      System.out.println(a.warning("Nu exista medici inregistrati."));
-      return;
-    }
-    Medic medic = findMedicById(medicId);
+  public void addMedic(Medic medic) throws InvalidEntityDataException {
     if (medic == null){
-      System.out.println(a.warning("Nu exista medic cu id-ul cerut."));
-      return;
+      throw new InvalidEntityDataException("Medicul nu poate fi null.");
     }
-    System.out.println(a.title("Detalii medic"));
-    System.out.println(a.line());
-    System.out.println(medic);
-    System.out.println(a.line());
-  } 
+    if (medic.getFirstName().isEmpty() || medic.getLastName().isEmpty()){
+      throw new InvalidEntityDataException("Medicul trebuie sa aiba nume si prenume.");
+    }
+    medici.add(medic);
+    mediciById.put(medic.getId(), medic);
+    mediciByDepartament.computeIfAbsent(medic.getDepartament(), key -> new ArrayList<>()).add(medic);
+  }
 
+  public void deleteMedic(int id) throws EntityNotFoundException {
+    Medic medic = findMedicById(id);
+    medici.remove(medic);
+    mediciById.remove(id);
+    List<Medic> departamentMedics = mediciByDepartament.get(medic.getDepartament());
+    if (departamentMedics != null){
+      departamentMedics.remove(medic);
+      if (departamentMedics.isEmpty()){
+        mediciByDepartament.remove(medic.getDepartament());
+      }
+    }
+  }
 
+  public Medic findMedicById(int id) throws EntityNotFoundException {
+    Medic medic = mediciById.get(id);
+    if (medic == null){
+      throw new EntityNotFoundException("Nu exista medic cu id-ul " + id + ".");
+    }
+    return medic;
+  }
 
+  public List<Medic> findMediciByDepartament(String departament){
+    return new ArrayList<>(mediciByDepartament.getOrDefault(departament, new ArrayList<>()));
+  }
+
+  public List<Medic> getAllMedici(){
+    return new ArrayList<>(medici);
+  }
+
+  public TreeSet<Medic> getSortedMedici(){
+    return new TreeSet<>(medici);
+  }
 }

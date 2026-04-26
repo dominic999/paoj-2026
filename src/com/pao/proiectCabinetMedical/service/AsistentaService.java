@@ -1,15 +1,18 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.Asistenta;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Asistenta;
 
 public class AsistentaService {
 
-  private Asistenta[] asistente;
-  Ansi a = Ansi.getInstance();
+  private final List<Asistenta> asistente;
 
   private AsistentaService(){
-    this.asistente = new Asistenta[0];
+    this.asistente = new ArrayList<>();
   }
 
   private static class Holder{
@@ -20,52 +23,29 @@ public class AsistentaService {
     return Holder.INSTANCE;
   }
 
-  public void addAsistenta(Asistenta o){
-    Asistenta[] now = new Asistenta[asistente.length + 1];
-    System.arraycopy(asistente, 0, now, 0, asistente.length);
-    now[asistente.length] = o;
-    asistente = now;
+  public void addAsistenta(Asistenta asistenta) throws InvalidEntityDataException {
+    if (asistenta == null){
+      throw new InvalidEntityDataException("Asistenta nu poate fi null.");
+    }
+    asistente.add(asistenta);
   }
 
-  public Asistenta[] getAsistente(){
-    return asistente.clone();
+  public void deleteAsistenta(String firstName, String lastName) throws EntityNotFoundException {
+    Asistenta asistenta = findAsistentaByName(firstName, lastName);
+    asistente.remove(asistenta);
   }
 
-  public void showAsistente(){
-    System.out.println(a.title("Lista asistentelor"));
-    System.out.println(a.line());
-    for (int i = 0; i < asistente.length; i++){
-      System.out.println(asistente[i]);
-    }
-    if (asistente.length == 0){
-      System.out.println(a.warning("Nu exista asistente inregistrate."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deleteAsistenta(int idx){
-    if (idx < 0 || idx >= asistente.length){
-      return;
-    }
-    Asistenta[] newAsistente = new Asistenta[asistente.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < asistente.length; i++){
-      if (i != idx){
-        newAsistente[newIdx++] = asistente[i];
+  public Asistenta findAsistentaByName(String firstName, String lastName) throws EntityNotFoundException {
+    for (Asistenta asistenta : asistente){
+      if (asistenta.getFirstName().equalsIgnoreCase(firstName) &&
+          asistenta.getLastName().equalsIgnoreCase(lastName)){
+        return asistenta;
       }
     }
-    asistente = newAsistente;
+    throw new EntityNotFoundException("Asistenta nu a fost gasita: " + firstName + " " + lastName);
   }
 
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu asistentele?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toate asistentele."));
-    System.out.println(a.option(2, "Adauga o asistenta noua."));
-    System.out.println(a.option(3, "Sterge o asistenta dupa index."));
-    System.out.println(a.option(4, "Vezi salile de care raspunde o asistenta."));
-    System.out.println(a.option(5, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(6, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public List<Asistenta> getAllAsistente(){
+    return new ArrayList<>(asistente);
   }
 }

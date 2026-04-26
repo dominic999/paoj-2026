@@ -1,15 +1,18 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.Manager;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Manager;
 
 public class ManagerService {
 
-  private Manager[] manageri;
-  Ansi a = Ansi.getInstance();
+  private final List<Manager> manageri;
 
   private ManagerService(){
-    this.manageri = new Manager[0];
+    this.manageri = new ArrayList<>();
   }
 
   private static class Holder{
@@ -20,52 +23,28 @@ public class ManagerService {
     return Holder.INSTANCE;
   }
 
-  public void addManager(Manager o){
-    Manager[] now = new Manager[manageri.length + 1];
-    System.arraycopy(manageri, 0, now, 0, manageri.length);
-    now[manageri.length] = o;
-    manageri = now;
+  public void addManager(Manager manager) throws InvalidEntityDataException {
+    if (manager == null){
+      throw new InvalidEntityDataException("Managerul nu poate fi null.");
+    }
+    manageri.add(manager);
   }
 
-  public Manager[] getManageri(){
-    return manageri.clone();
+  public void deleteManager(int id) throws EntityNotFoundException {
+    Manager manager = findManagerById(id);
+    manageri.remove(manager);
   }
 
-  public void showManageri(){
-    System.out.println(a.title("Lista managerilor"));
-    System.out.println(a.line());
-    for (int i = 0; i < manageri.length; i++){
-      System.out.println(manageri[i]);
-    }
-    if (manageri.length == 0){
-      System.out.println(a.warning("Nu exista manageri inregistrati."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deleteManager(int idx){
-    if (idx < 0 || idx >= manageri.length){
-      return;
-    }
-    Manager[] newManageri = new Manager[manageri.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < manageri.length; i++){
-      if (i != idx){
-        newManageri[newIdx++] = manageri[i];
+  public Manager findManagerById(int id) throws EntityNotFoundException {
+    for (Manager manager : manageri){
+      if (manager.getId() == id){
+        return manager;
       }
     }
-    manageri = newManageri;
+    throw new EntityNotFoundException("Nu exista manager cu id-ul " + id + ".");
   }
 
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu managerii?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toti managerii."));
-    System.out.println(a.option(2, "Adauga un manager nou."));
-    System.out.println(a.option(3, "Sterge un manager dupa index."));
-    System.out.println(a.option(4, "Vezi cati subordonati are fiecare manager."));
-    System.out.println(a.option(5, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(6, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public List<Manager> getAllManageri(){
+    return new ArrayList<>(manageri);
   }
 }

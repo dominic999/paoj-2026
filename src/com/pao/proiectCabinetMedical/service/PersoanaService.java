@@ -1,15 +1,18 @@
 package com.pao.proiectCabinetMedical.service;
 
-import com.pao.proiectCabinetMedical.Persoana;
-import com.pao.proiectCabinetMedical.utils.Ansi;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.pao.proiectCabinetMedical.exception.EntityNotFoundException;
+import com.pao.proiectCabinetMedical.exception.InvalidEntityDataException;
+import com.pao.proiectCabinetMedical.model.Persoana;
 
 public class PersoanaService {
 
-  private Persoana[] persoane;
-  Ansi a = Ansi.getInstance();
+  private final List<Persoana> persoane;
 
   private PersoanaService(){
-    this.persoane = new Persoana[0];
+    this.persoane = new ArrayList<>();
   }
 
   private static class Holder{
@@ -20,51 +23,32 @@ public class PersoanaService {
     return Holder.INSTANCE;
   }
 
-  public void addPersoana(Persoana o){
-    Persoana[] now = new Persoana[persoane.length + 1];
-    System.arraycopy(persoane, 0, now, 0, persoane.length);
-    now[persoane.length] = o;
-    persoane = now;
+  public void addPersoana(Persoana persoana) throws InvalidEntityDataException {
+    if (persoana == null){
+      throw new InvalidEntityDataException("Persoana nu poate fi null.");
+    }
+    if (persoana.getFirstName().isEmpty() || persoana.getLastName().isEmpty()){
+      throw new InvalidEntityDataException("Persoana trebuie sa aiba prenume si nume.");
+    }
+    persoane.add(persoana);
   }
 
-  public Persoana[] getPersoane(){
-    return persoane.clone();
+  public void deletePersoana(String firstName, String lastName) throws EntityNotFoundException {
+    Persoana persoana = findPersoanaByName(firstName, lastName);
+    persoane.remove(persoana);
   }
 
-  public void showPersoane(){
-    System.out.println(a.title("Lista persoanelor"));
-    System.out.println(a.line());
-    for (int i = 0; i < persoane.length; i++){
-      System.out.println(persoane[i]);
-    }
-    if (persoane.length == 0){
-      System.out.println(a.warning("Nu exista persoane inregistrate."));
-    }
-    System.out.println(a.line());
-  }
-
-  public void deletePersoana(int idx){
-    if (idx < 0 || idx >= persoane.length){
-      return;
-    }
-    Persoana[] newPersoane = new Persoana[persoane.length - 1];
-    int newIdx = 0;
-    for (int i = 0; i < persoane.length; i++){
-      if (i != idx){
-        newPersoane[newIdx++] = persoane[i];
+  public Persoana findPersoanaByName(String firstName, String lastName) throws EntityNotFoundException {
+    for (Persoana persoana : persoane){
+      if (persoana.getFirstName().equalsIgnoreCase(firstName) &&
+          persoana.getLastName().equalsIgnoreCase(lastName)){
+        return persoana;
       }
     }
-    persoane = newPersoane;
+    throw new EntityNotFoundException("Persoana nu a fost gasita: " + firstName + " " + lastName);
   }
 
-  public void showOptions(){
-    System.out.println(a.title("Ce vreti sa faceti cu persoanele?"));
-    System.out.println(a.line());
-    System.out.println(a.option(1, "Vezi toate persoanele."));
-    System.out.println(a.option(2, "Adauga o persoana noua."));
-    System.out.println(a.option(3, "Sterge o persoana dupa index."));
-    System.out.println(a.option(4, "Inapoi la meniul entitatilor."));
-    System.out.println(a.option(5, "Iesire din aplicatie."));
-    System.out.println(a.line());
+  public List<Persoana> getAllPersoane(){
+    return new ArrayList<>(persoane);
   }
 }
