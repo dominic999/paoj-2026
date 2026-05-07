@@ -18,7 +18,7 @@ public abstract class Colaborator implements IOperatiiCitireScriere {
     }
 
     public String formatAfisare() {
-        return String.format("%s: %s %s, venit net anual: %.2f lei",
+        return String.format(java.util.Locale.US, "%s: %s %s, venit net anual: %.2f lei",
                 tipContract(), nume, prenume, calculeazaVenitNetAnual());
     }
 

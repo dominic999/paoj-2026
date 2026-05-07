@@ -129,7 +129,7 @@ public class Main {
         for (TipColaborator tip : TipColaborator.values()) {
             Double suma = sume.get(tip);
             Integer numar = numere.get(tip);
-            String sumaFormatata = suma == null ? "nu" : String.format("%.2f", suma);
+            String sumaFormatata = suma == null ? "nu" : String.format(java.util.Locale.US, "%.2f", suma);
             linii.add(String.format("%s: suma = %s lei, număr = %s", tip, sumaFormatata, numar));
         }
         System.out.print(String.join("\n", linii));
