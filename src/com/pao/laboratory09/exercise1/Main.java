@@ -40,7 +40,7 @@ public class Main {
 
             if (linie.equals("LIST")) {
                 for (Tranzactie t : rezultat) {
-                    System.out.printf("[%d] %s %s: %.2f RON | %s -> %s%n",
+                    System.out.printf(Locale.US, "[%d] %s %s: %.2f RON | %s -> %s%n",
                         t.getId(), t.getData(), t.getTip(), t.getSuma(),
                         t.getContSursa(), t.getContDestinatie());
                 }
@@ -49,7 +49,7 @@ public class Main {
                 boolean gasit = false;
                 for (Tranzactie t : rezultat) {
                     if (t.getData().startsWith(prefix)) {
-                        System.out.printf("[%d] %s %s: %.2f RON | %s -> %s%n",
+                        System.out.printf(Locale.US, "[%d] %s %s: %.2f RON | %s -> %s%n",
                             t.getId(), t.getData(), t.getTip(), t.getSuma(),
                             t.getContSursa(), t.getContDestinatie());
                         gasit = true;
