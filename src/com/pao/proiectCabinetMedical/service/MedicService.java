@@ -12,6 +12,8 @@ import com.pao.proiectCabinetMedical.model.Medic;
 
 public class MedicService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final List<Medic> medici;
   private final Map<Integer, Medic> mediciById;
   private final Map<String, List<Medic>> mediciByDepartament;
@@ -31,6 +33,7 @@ public class MedicService {
   }
 
   public void addMedic(Medic medic) throws InvalidEntityDataException {
+    AUDIT.log("addMedic");
     if (medic == null){
       throw new InvalidEntityDataException("Medicul nu poate fi null.");
     }
@@ -43,6 +46,7 @@ public class MedicService {
   }
 
   public void deleteMedic(int id) throws EntityNotFoundException {
+    AUDIT.log("deleteMedic");
     Medic medic = findMedicById(id);
     medici.remove(medic);
     mediciById.remove(id);
@@ -56,6 +60,7 @@ public class MedicService {
   }
 
   public Medic findMedicById(int id) throws EntityNotFoundException {
+    AUDIT.log("findMedicById");
     Medic medic = mediciById.get(id);
     if (medic == null){
       throw new EntityNotFoundException("Nu exista medic cu id-ul " + id + ".");
@@ -64,14 +69,17 @@ public class MedicService {
   }
 
   public List<Medic> findMediciByDepartament(String departament){
+    AUDIT.log("findMediciByDepartament");
     return new ArrayList<>(mediciByDepartament.getOrDefault(departament, new ArrayList<>()));
   }
 
   public List<Medic> getAllMedici(){
+    AUDIT.log("getAllMedici");
     return new ArrayList<>(medici);
   }
 
   public TreeSet<Medic> getSortedMedici(){
+    AUDIT.log("getSortedMedici");
     return new TreeSet<>(medici);
   }
 }

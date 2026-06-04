@@ -9,6 +9,12 @@ public class MedicSpecialist extends Medic {
     this.specs = specs == null ? new String[0] : specs.clone();
   }
 
+  // folosit la reconstruirea entitatii din baza de date (Etapa 2)
+  public MedicSpecialist(int id, String firstName, String lastName, boolean deGarda, int aniExperienta, boolean rezident, String departament, String[] specs){
+    super(id, firstName, lastName, deGarda, aniExperienta, rezident, departament);
+    this.specs = specs == null ? new String[0] : specs.clone();
+  }
+
   public String[] getSpecs(){
     return this.specs.clone();
   }

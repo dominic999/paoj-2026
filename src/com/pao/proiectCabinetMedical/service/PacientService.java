@@ -11,6 +11,8 @@ import com.pao.proiectCabinetMedical.model.Pacient;
 
 public class PacientService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final List<Pacient> pacienti;
   private final Map<String, List<Pacient>> pacientiByDiagnostic;
 
@@ -28,6 +30,7 @@ public class PacientService {
   }
 
   public void addPacient(Pacient pacient) throws InvalidEntityDataException {
+    AUDIT.log("addPacient");
     if (pacient == null){
       throw new InvalidEntityDataException("Pacientul nu poate fi null.");
     }
@@ -39,6 +42,7 @@ public class PacientService {
   }
 
   public void deletePacient(String firstName, String lastName) throws EntityNotFoundException {
+    AUDIT.log("deletePacient");
     Pacient pacient = findPacientByName(firstName, lastName);
     pacienti.remove(pacient);
     List<Pacient> diagnosticGroup = pacientiByDiagnostic.get(pacient.getDiagnostic());
@@ -51,6 +55,7 @@ public class PacientService {
   }
 
   public Pacient findPacientByName(String firstName, String lastName) throws EntityNotFoundException {
+    AUDIT.log("findPacientByName");
     for (Pacient pacient : pacienti){
       if (pacient.getFirstName().equalsIgnoreCase(firstName) &&
           pacient.getLastName().equalsIgnoreCase(lastName)){
@@ -61,10 +66,12 @@ public class PacientService {
   }
 
   public List<Pacient> findPacientiByDiagnostic(String diagnostic){
+    AUDIT.log("findPacientiByDiagnostic");
     return new ArrayList<>(pacientiByDiagnostic.getOrDefault(diagnostic, new ArrayList<>()));
   }
 
   public List<Pacient> getUrgentPacienti(){
+    AUDIT.log("getUrgentPacienti");
     List<Pacient> urgent = new ArrayList<>();
     for (Pacient pacient : pacienti){
       if (pacient.isUrgenta()){
@@ -75,6 +82,7 @@ public class PacientService {
   }
 
   public List<Pacient> getAllPacienti(){
+    AUDIT.log("getAllPacienti");
     return new ArrayList<>(pacienti);
   }
 }

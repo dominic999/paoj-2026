@@ -9,6 +9,8 @@ import com.pao.proiectCabinetMedical.model.MedicSpecialist;
 
 public class MedicSpecialistService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final List<MedicSpecialist> specialisti;
 
   private MedicSpecialistService(){
@@ -24,6 +26,7 @@ public class MedicSpecialistService {
   }
 
   public void addMedicSpecialist(MedicSpecialist medic) throws InvalidEntityDataException {
+    AUDIT.log("addMedicSpecialist");
     if (medic == null){
       throw new InvalidEntityDataException("Medicul specialist nu poate fi null.");
     }
@@ -31,11 +34,13 @@ public class MedicSpecialistService {
   }
 
   public void deleteMedicSpecialist(int id) throws EntityNotFoundException {
+    AUDIT.log("deleteMedicSpecialist");
     MedicSpecialist medic = findMedicSpecialistById(id);
     specialisti.remove(medic);
   }
 
   public MedicSpecialist findMedicSpecialistById(int id) throws EntityNotFoundException {
+    AUDIT.log("findMedicSpecialistById");
     for (MedicSpecialist medic : specialisti){
       if (medic.getId() == id){
         return medic;
@@ -45,6 +50,7 @@ public class MedicSpecialistService {
   }
 
   public void addSpecToMedic(int id, String spec) throws EntityNotFoundException, InvalidEntityDataException {
+    AUDIT.log("addSpecToMedic");
     if (spec == null || spec.trim().isEmpty()){
       throw new InvalidEntityDataException("Specializarea nu poate fi goala.");
     }
@@ -52,6 +58,7 @@ public class MedicSpecialistService {
   }
 
   public List<MedicSpecialist> getAllMediciSpecialisti(){
+    AUDIT.log("getAllMediciSpecialisti");
     return new ArrayList<>(specialisti);
   }
 }

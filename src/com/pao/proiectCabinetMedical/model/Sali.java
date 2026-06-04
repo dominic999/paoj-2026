@@ -7,12 +7,21 @@ import com.pao.proiectCabinetMedical.utils.Ansi;
 public class Sali {
 
   private Ansi a = Ansi.getInstance();
+  private Integer id; // atribuit de baza de date (Etapa 2), null cat timp sala nu e persistata
   private int numar;
   private String cladire;
 
   public Sali(int numar, String cladire){
     this.numar = numar;
     this.cladire = cladire == null ? "" : cladire.trim();
+  }
+
+  public Integer getId(){
+    return this.id;
+  }
+
+  public void setId(Integer id){
+    this.id = id;
   }
 
   public int getNumar(){

@@ -11,6 +11,8 @@ import com.pao.proiectCabinetMedical.model.Medicamente;
 
 public class MedicamenteService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final Set<Medicamente> medicamente;
 
   private MedicamenteService(){
@@ -26,6 +28,7 @@ public class MedicamenteService {
   }
 
   public void addMedicament(Medicamente medicament) throws InvalidEntityDataException {
+    AUDIT.log("addMedicament");
     if (medicament == null){
       throw new InvalidEntityDataException("Medicamentul nu poate fi null.");
     }
@@ -33,11 +36,13 @@ public class MedicamenteService {
   }
 
   public void deleteMedicament(String denumire) throws EntityNotFoundException {
+    AUDIT.log("deleteMedicament");
     Medicamente medicament = findMedicamentByName(denumire);
     medicamente.remove(medicament);
   }
 
   public Medicamente findMedicamentByName(String denumire) throws EntityNotFoundException {
+    AUDIT.log("findMedicamentByName");
     for (Medicamente medicament : medicamente){
       if (medicament.getDenumire().equalsIgnoreCase(denumire)){
         return medicament;
@@ -47,6 +52,7 @@ public class MedicamenteService {
   }
 
   public List<Medicamente> getAllMedicamente(){
+    AUDIT.log("getAllMedicamente");
     return new ArrayList<>(medicamente);
   }
 }

@@ -11,6 +11,8 @@ import com.pao.proiectCabinetMedical.model.Sali;
 
 public class SaliService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final Set<Sali> sali;
 
   private SaliService(){
@@ -32,6 +34,7 @@ public class SaliService {
   }
 
   public void addSala(Sali sala) throws InvalidEntityDataException {
+    AUDIT.log("addSala");
     if (sala == null){
       throw new InvalidEntityDataException("Sala nu poate fi null.");
     }
@@ -39,11 +42,13 @@ public class SaliService {
   }
 
   public void deleteSala(int numar, String cladire) throws EntityNotFoundException {
+    AUDIT.log("deleteSala");
     Sali sala = findSala(numar, cladire);
     sali.remove(sala);
   }
 
   public Sali findSala(int numar, String cladire) throws EntityNotFoundException {
+    AUDIT.log("findSala");
     for (Sali sala : sali){
       if (sala.getNumar() == numar && sala.getCladire().equalsIgnoreCase(cladire)){
         return sala;
@@ -53,6 +58,7 @@ public class SaliService {
   }
 
   public List<Sali> getAllSali(){
+    AUDIT.log("getAllSali");
     return new ArrayList<>(sali);
   }
 }

@@ -9,6 +9,8 @@ import com.pao.proiectCabinetMedical.model.Asistenta;
 
 public class AsistentaService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final List<Asistenta> asistente;
 
   private AsistentaService(){
@@ -24,6 +26,7 @@ public class AsistentaService {
   }
 
   public void addAsistenta(Asistenta asistenta) throws InvalidEntityDataException {
+    AUDIT.log("addAsistenta");
     if (asistenta == null){
       throw new InvalidEntityDataException("Asistenta nu poate fi null.");
     }
@@ -31,11 +34,13 @@ public class AsistentaService {
   }
 
   public void deleteAsistenta(String firstName, String lastName) throws EntityNotFoundException {
+    AUDIT.log("deleteAsistenta");
     Asistenta asistenta = findAsistentaByName(firstName, lastName);
     asistente.remove(asistenta);
   }
 
   public Asistenta findAsistentaByName(String firstName, String lastName) throws EntityNotFoundException {
+    AUDIT.log("findAsistentaByName");
     for (Asistenta asistenta : asistente){
       if (asistenta.getFirstName().equalsIgnoreCase(firstName) &&
           asistenta.getLastName().equalsIgnoreCase(lastName)){
@@ -46,6 +51,7 @@ public class AsistentaService {
   }
 
   public List<Asistenta> getAllAsistente(){
+    AUDIT.log("getAllAsistente");
     return new ArrayList<>(asistente);
   }
 }

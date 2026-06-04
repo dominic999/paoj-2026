@@ -2,6 +2,7 @@ package com.pao.proiectCabinetMedical.model;
 
 public class Pacient extends Persoana {
 
+  private Integer id; // atribuit de baza de date (Etapa 2), null cat timp pacientul nu e persistat
   private String diagnostic;
   private boolean urgenta;
   private Medic medicSupervizor;
@@ -13,6 +14,14 @@ public class Pacient extends Persoana {
     this.urgenta = urgenta;
     this.medicSupervizor = medicSupervizor;
     this.record = record;
+  }
+
+  public Integer getId(){
+    return this.id;
+  }
+
+  public void setId(Integer id){
+    this.id = id;
   }
 
   public String getDiagnostic(){

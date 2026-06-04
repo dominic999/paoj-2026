@@ -9,6 +9,8 @@ import com.pao.proiectCabinetMedical.model.Manager;
 
 public class ManagerService {
 
+  private static final AuditService AUDIT = AuditService.getInstance();
+
   private final List<Manager> manageri;
 
   private ManagerService(){
@@ -24,6 +26,7 @@ public class ManagerService {
   }
 
   public void addManager(Manager manager) throws InvalidEntityDataException {
+    AUDIT.log("addManager");
     if (manager == null){
       throw new InvalidEntityDataException("Managerul nu poate fi null.");
     }
@@ -31,11 +34,13 @@ public class ManagerService {
   }
 
   public void deleteManager(int id) throws EntityNotFoundException {
+    AUDIT.log("deleteManager");
     Manager manager = findManagerById(id);
     manageri.remove(manager);
   }
 
   public Manager findManagerById(int id) throws EntityNotFoundException {
+    AUDIT.log("findManagerById");
     for (Manager manager : manageri){
       if (manager.getId() == id){
         return manager;
@@ -45,6 +50,7 @@ public class ManagerService {
   }
 
   public List<Manager> getAllManageri(){
+    AUDIT.log("getAllManageri");
     return new ArrayList<>(manageri);
   }
 }

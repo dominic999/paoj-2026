@@ -14,6 +14,11 @@ import com.pao.proiectCabinetMedical.model.Medicamente;
 import com.pao.proiectCabinetMedical.model.Pacient;
 import com.pao.proiectCabinetMedical.model.Persoana;
 import com.pao.proiectCabinetMedical.model.Sali;
+import com.pao.proiectCabinetMedical.exception.StocInsuficientException;
+import com.pao.proiectCabinetMedical.repository.MedicRepository;
+import com.pao.proiectCabinetMedical.repository.MedicamentRepository;
+import com.pao.proiectCabinetMedical.repository.PacientRepository;
+import com.pao.proiectCabinetMedical.repository.SalaRepository;
 import com.pao.proiectCabinetMedical.service.AsistentaService;
 import com.pao.proiectCabinetMedical.service.ManagerService;
 import com.pao.proiectCabinetMedical.service.MedicamenteService;
@@ -21,8 +26,10 @@ import com.pao.proiectCabinetMedical.service.MedicService;
 import com.pao.proiectCabinetMedical.service.MedicSpecialistService;
 import com.pao.proiectCabinetMedical.service.PacientService;
 import com.pao.proiectCabinetMedical.service.PersoanaService;
+import com.pao.proiectCabinetMedical.service.PrescriptieService;
 import com.pao.proiectCabinetMedical.service.SaliService;
 import com.pao.proiectCabinetMedical.utils.Ansi;
+import com.pao.proiectCabinetMedical.utils.SchemaRunner;
 
 public class Main {
 
@@ -35,10 +42,16 @@ public class Main {
   private static final ManagerService MANAGER_SERVICE = ManagerService.getInstance();
   private static final SaliService SALI_SERVICE = SaliService.getInstance();
   private static final MedicamenteService MEDICAMENTE_SERVICE = MedicamenteService.getInstance();
+  private static final MedicRepository MEDIC_REPOSITORY = MedicRepository.getInstance();
+  private static final PacientRepository PACIENT_REPOSITORY = PacientRepository.getInstance();
+  private static final SalaRepository SALA_REPOSITORY = SalaRepository.getInstance();
+  private static final MedicamentRepository MEDICAMENT_REPOSITORY = MedicamentRepository.getInstance();
+  private static final PrescriptieService PRESCRIPTIE_SERVICE = PrescriptieService.getInstance();
 
   public static void main(String[] args){
     try {
       runDemo();
+      runDemoEtapa2();
     } catch (InvalidEntityDataException | EntityNotFoundException e) {
       System.out.println(ANSI.danger("Eroare neasteptata in demo: " + e.getMessage()));
     }
@@ -132,6 +145,90 @@ public class Main {
     } catch (EntityNotFoundException e) {
       System.out.println(ANSI.warning("Exceptie tratata: " + e.getMessage()));
     }
+  }
+
+  private static void runDemoEtapa2(){
+    printTitle("Demo Etapa 2 - Persistenta JDBC, Tranzactii si Audit");
+
+    printAction(17, "Initializeaza schema bazei de date (DROP + CREATE din resources/schema.sql)");
+    SchemaRunner.run("resources/schema.sql");
+    System.out.println(ANSI.value("Schema initializata cu succes."));
+
+    printAction(18, "CRUD medici in baza de date (save + findAll)");
+    Medic medicDb1 = new Medic("Andrei", "Tirdea", true, 7, false, "cardiologie");
+    Medic medicDb2 = new Medic("Miruna", "Zaharia", false, 2, true, "urgente");
+    MedicSpecialist specialistDb = new MedicSpecialist("Dominic", "Ionescu", false, 10, false, "chirurgie", new String[]{"chirurgie", "urologie"});
+    MEDIC_REPOSITORY.save(medicDb1);
+    MEDIC_REPOSITORY.save(medicDb2);
+    MEDIC_REPOSITORY.save(specialistDb);
+    printList("Medici din baza de date", MEDIC_REPOSITORY.findAll());
+
+    printAction(19, "findById + update + delete pe medici");
+    System.out.println(MEDIC_REPOSITORY.findById(medicDb1.getId()).orElseThrow());
+    medicDb1.setAniExperienta(8);
+    medicDb1.setDeGarda(false);
+    MEDIC_REPOSITORY.update(medicDb1);
+    System.out.println(ANSI.label("Dupa update:"));
+    System.out.println(MEDIC_REPOSITORY.findById(medicDb1.getId()).orElseThrow());
+    MEDIC_REPOSITORY.delete(medicDb2.getId());
+    printList("Medici ramasi dupa delete", MEDIC_REPOSITORY.findAll());
+
+    printAction(20, "CRUD sali in baza de date");
+    Sali salaDb = new Sali(101, "A");
+    SALA_REPOSITORY.save(salaDb);
+    SALA_REPOSITORY.save(new Sali(202, "B"));
+    salaDb.setNumar(105);
+    SALA_REPOSITORY.update(salaDb);
+    printList("Sali din baza de date", SALA_REPOSITORY.findAll());
+
+    printAction(21, "CRUD medicamente in baza de date (cheie primara String)");
+    MEDICAMENT_REPOSITORY.save(new Medicamente("Paracetamol", 150));
+    MEDICAMENT_REPOSITORY.save(new Medicamente("Ibuprofen", 3));
+    MEDICAMENT_REPOSITORY.save(new Medicamente("Aspirina", 40));
+    MEDICAMENT_REPOSITORY.delete("Aspirina");
+    printList("Medicamente din baza de date", MEDICAMENT_REPOSITORY.findAll());
+
+    printAction(22, "Interneaza pacienti (tranzactie: medical_record + pacient)");
+    MedicalRecord recordDb = new MedicalRecord("REC-2001", LocalDate.of(2026, 6, 1), "fractura inchisa");
+    Pacient pacientDb1 = new Pacient("Ana", "Popescu", "fractura", true, medicDb1, recordDb);
+    Pacient pacientDb2 = new Pacient("Vlad", "Stan", "apendicita", true, specialistDb,
+        new MedicalRecord("REC-2002", LocalDate.of(2026, 6, 2), "apendicita acuta"));
+    PACIENT_REPOSITORY.save(pacientDb1);
+    PACIENT_REPOSITORY.save(pacientDb2);
+    printList("Pacienti din baza de date", PACIENT_REPOSITORY.findAll());
+
+    printAction(23, "Tranzactie JDBC explicita: prescrie medicamente (insert prescriptie + scade stoc, commit)");
+    try {
+      PRESCRIPTIE_SERVICE.prescrieMedicament(pacientDb1.getId(), "Paracetamol", 20);
+      PRESCRIPTIE_SERVICE.prescrieMedicament(pacientDb1.getId(), "Ibuprofen", 2);
+      PRESCRIPTIE_SERVICE.prescrieMedicament(pacientDb2.getId(), "Paracetamol", 10);
+      System.out.println(ANSI.value("Prescriptii salvate, stoc actualizat (commit)."));
+    } catch (StocInsuficientException e){
+      System.out.println(ANSI.warning("Exceptie tratata: " + e.getMessage()));
+    }
+
+    printAction(24, "Tranzactie cu rollback: stoc insuficient");
+    try {
+      PRESCRIPTIE_SERVICE.prescrieMedicament(pacientDb2.getId(), "Ibuprofen", 99);
+    } catch (StocInsuficientException e){
+      System.out.println(ANSI.warning("Exceptie tratata: " + e.getMessage()));
+    }
+    printList("Stoc dupa tranzactii", MEDICAMENT_REPOSITORY.findAll());
+
+    printAction(25, "Interogare JOIN 1: pacientii urgenti cu medicul supervizor");
+    printList("Pacienti urgenti", PACIENT_REPOSITORY.findUrgentiCuMedic());
+
+    printAction(26, "Interogare JOIN 2: numarul de pacienti per medic");
+    printList("Pacienti per medic", MEDIC_REPOSITORY.countPacientiPerMedic());
+
+    printAction(27, "Interogare JOIN 3: cele mai prescrise medicamente");
+    printList("Top medicamente", PRESCRIPTIE_SERVICE.topMedicamentePrescrise());
+
+    printAction(28, "Interogare JOIN 4 (3 tabele): prescriptiile unui pacient");
+    printList("Prescriptiile pacientului " + pacientDb1.getFirstName(), PRESCRIPTIE_SERVICE.prescriptiilePacientului(pacientDb1.getId()));
+
+    System.out.println(ANSI.line());
+    System.out.println(ANSI.value("Toate actiunile au fost logate in audit.csv (mod append, thread-safe)."));
   }
 
   private static void printTitle(String title){

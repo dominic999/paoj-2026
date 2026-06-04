@@ -14,8 +14,13 @@ public class Medic extends Persoana implements Comparable<Medic> {
   private String departament;
 
   public Medic(String firstName, String lastName, boolean deGarda, int aniExperienta, boolean rezident, String departament){
+    this(GENERATOR.getCurrentId(), firstName, lastName, deGarda, aniExperienta, rezident, departament);
+  }
+
+  // folosit la reconstruirea entitatii din baza de date (Etapa 2)
+  public Medic(int id, String firstName, String lastName, boolean deGarda, int aniExperienta, boolean rezident, String departament){
     super(firstName, lastName);
-    this.id = GENERATOR.getCurrentId();
+    this.id = id;
     this.deGarda = deGarda;
     this.aniExperienta = Math.max(0, aniExperienta);
     this.rezident = rezident;
