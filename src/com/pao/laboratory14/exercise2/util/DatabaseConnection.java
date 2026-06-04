@@ -37,10 +37,21 @@ public class DatabaseConnection {
     }
 
     public static DatabaseConnection getInstance() throws IOException, SQLException {
-        if (instance == null) {
+        if (instance == null || instance.connection == null || instance.connection.isClosed()) {
             instance = new DatabaseConnection();
         }
         return instance;
+    }
+
+    public static void reset() {
+        if (instance != null) {
+            try {
+                if (instance.connection != null && !instance.connection.isClosed()) {
+                    instance.connection.close();
+                }
+            } catch (SQLException ignored) {}
+            instance = null;
+        }
     }
 
     public Connection getConnection() {
