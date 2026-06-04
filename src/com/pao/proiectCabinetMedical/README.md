@@ -105,4 +105,20 @@ java  -cp src:lib/postgresql-42.7.4.jar com.pao.proiectCabinetMedical.Main
 
 Demo-ul ruleaza intai actiunile Etapei 1 (in memorie), apoi initializeaza schema si demonstreaza CRUD, tranzactii (commit + rollback) si interogarile cu JOIN.
 
+### Demo vizual
+
+`DemoVizual.java` parcurge pas cu pas (40 de pasi, grupati pe sectiuni) toate functionalitatile ambelor etape, afisand starea sistemului inainte si dupa fiecare operatie: servicii in memorie, colectii sortate, exceptii tratate, CRUD pe fiecare repository, tranzactiile cu commit/rollback (cu stocul vizibil inainte/dupa), interogarile JOIN si coada fisierului de audit.
+
+```bash
+make demo
+```
+
+### Checker
+
+`Checker.java` ruleaza 21 de teste automate care valideaza functionalitatile ambelor etape (ierarhie de mostenire, imutabilitate, servicii in memorie, exceptii custom, interfata generica `Repository`, ciclurile CRUD pe toate cele 4 repository-uri, tranzactiile cu commit si rollback, interogarile cu JOIN, modul append si thread-safety-ul `AuditService`). Iese cu cod 1 daca vreun test pica.
+
+```bash
+make check
+```
+
 Baza de date se creeaza o singura data cu: `psql -h localhost -c "CREATE DATABASE paoj_proiect"`.

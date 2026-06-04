@@ -5,3 +5,11 @@ six-one:
 proiect:
 	javac -cp src:lib/postgresql-42.7.4.jar src/com/pao/proiectCabinetMedical/Main.java
 	java -cp src:lib/postgresql-42.7.4.jar com.pao.proiectCabinetMedical.Main
+
+check:
+	javac -cp src:lib/postgresql-42.7.4.jar src/com/pao/proiectCabinetMedical/Checker.java
+	java -cp src:lib/postgresql-42.7.4.jar com.pao.proiectCabinetMedical.Checker
+
+demo:
+	javac -cp src:lib/postgresql-42.7.4.jar src/com/pao/proiectCabinetMedical/DemoVizual.java
+	java -cp src:lib/postgresql-42.7.4.jar com.pao.proiectCabinetMedical.DemoVizual
